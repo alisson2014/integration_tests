@@ -9,35 +9,6 @@ use Alura\Auction\Dao\Auction as DaoAuction;
 use Alura\Auction\Service\Terminator;
 use PHPUnit\Framework\TestCase;
 
-class DaoAuctionMock extends DaoAuction
-{
-    private array $auctions = [];
-
-    public function save(Auction $auction): void
-    {
-        $this->auctions[] = $auction;
-    }
-
-    public function recoverFinished(): array
-    {
-        return array_filter($this->auctions, function (Auction $auction): bool {
-            return $auction->isFinished();
-        });
-    }
-
-    public function recoverUnfinished(): array
-    {
-        return array_filter($this->auctions, function (Auction $auction): bool {
-            return !$auction->isFinished();
-        });
-    }
-
-    public function update(Auction $auction): void
-    {
-        return;
-    }
-}
-
 class TerminatorTest extends TestCase
 {
     public function testAuctionsOlderThanAWeekMustBeCanceled(): void
@@ -52,23 +23,26 @@ class TerminatorTest extends TestCase
             new \DateTimeImmutable('10 days ago')
         );
 
-        $mockAuction = new DaoAuctionMock();
-        $mockAuction->save($fiatAuction);
-        $mockAuction->save($variantAuction);
+        $mockAuction = $this->createMock(DaoAuction::class);
+        $mockAuction->method('recoverUnfinished')
+            ->willReturn([$fiatAuction, $variantAuction]);
+        $matcher = $this->exactly(2);
+        $mockAuction->expects($matcher)
+            ->method('update')
+            ->willReturnCallback(function (Auction $value) use ($matcher, $fiatAuction, $variantAuction) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => self::assertEquals($fiatAuction, $value),
+                    2 => self::assertEquals($variantAuction, $value)
+                };
+            }); 
 
         $terminator = new Terminator($mockAuction);
         $terminator->closes();
 
-        $auctionsClosed = $mockAuction->recoverFinished();
+        $auctionsClosed = [$fiatAuction, $variantAuction];
 
         self::assertCount(2, $auctionsClosed);
-        self::assertEquals(
-            'Fiat 147 0Km',
-            $auctionsClosed[0]->getDescription()
-        );
-        self::assertEquals(
-            'Variante 0Km',
-            $auctionsClosed[1]->getDescription()
-        );
+        self::assertTrue($auctionsClosed[0]->isFinished());
+        self::assertTrue($auctionsClosed[1]->isFinished());
     }
 }
