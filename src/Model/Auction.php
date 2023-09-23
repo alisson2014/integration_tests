@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Alura\Auction\Model;
 
-class Auction
+final class Auction
 {
     /** @var Bid[] */
     private array $bids = [];
@@ -36,14 +36,12 @@ class Auction
         $this->bids[] = $bid;
     }
 
-    public function ends()
+    public function ends(): void
     {
         $this->finished = true;
     }
 
-    /**
-     * @return Bid[]
-     */
+    /** @return Bid[] */
     public function getBids(): array
     {
         return $this->bids;

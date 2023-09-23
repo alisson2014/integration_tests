@@ -66,4 +66,15 @@ class TerminatorTest extends TestCase
 
         $this->terminator->closes();
     }
+
+    public function testThenYouShouldSendAuctionByEmailOnceCompleted()
+    {
+        $this->mockEmailSender->expects(self::exactly(2))
+            ->method('notifyEndOfAuction')
+            ->willReturnCallback(function (Auction $auction) {
+                self::assertTrue($auction->isFinished());
+            });
+
+        $this->terminator->closes();
+    }
 }
