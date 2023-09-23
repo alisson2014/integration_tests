@@ -9,11 +9,9 @@ use Alura\Auction\Model\Auction as ModelAuction;
 
 class Auction
 {
-    private \PDO $conn;
 
-    public function __construct()
+    public function __construct(private \PDO $conn)
     {
-        $this->conn = ConnectionCreator::getConnection();
     }
 
     public function save(ModelAuction $auction): void

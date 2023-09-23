@@ -8,8 +8,10 @@ use Alura\Auction\Dao\Auction as DaoAuction;
 
 class Terminator
 {
-    public function __construct(private DaoAuction $dao)
-    {
+    public function __construct(
+        private DaoAuction $dao,
+        private EmailSender $emailSender
+    ) {
     }
 
     public function closes(): void
@@ -18,8 +20,13 @@ class Terminator
 
         foreach ($auctions as $auction) {
             if ($auction->ItsMoreThanAWeekOld()) {
-                $auction->ends();
-                $this->dao->update($auction);
+                try {
+                    $auction->ends();
+                    $this->dao->update($auction);
+                    $this->emailSender->notifyEndOfAuction($auction);
+                } catch (\DomainException $e) {
+                    error_log($e->getMessage());
+                }
             }
         }
     }
