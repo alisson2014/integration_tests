@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Alura\Auction\Dao;
 
-use Alura\Auction\Infrastructure\ConnectionCreator;
 use Alura\Auction\Model\Auction as ModelAuction;
 
 class Auction
 {
-
     public function __construct(private \PDO $conn)
     {
     }
@@ -46,9 +44,9 @@ class Auction
         $auctions = [];
         foreach ($data as $given) {
             $auction = new ModelAuction($given['descricao'], new \DateTimeImmutable($given['dataInicio']), $given['id']);
-            if ($given['finalizado']) {
-                $auction->ends();
-            }
+            
+            if ($given['finalizado']) $auction->ends();
+            
             $auctions[] = $auction;
         }
 
