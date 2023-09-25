@@ -57,7 +57,7 @@ class Auction
     {
         $sql = 'UPDATE leiloes SET descricao = :descricao, dataInicio = :dataInicio, finalizado = :finalizado WHERE id = :id';
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':descricao', $auction->getDescription());
+        $stmt->bindValue(':descricao', $auction->getDescription(), \PDO::PARAM_STR);
         $stmt->bindValue(':dataInicio', $auction->getStartDate()->format('Y-m-d'));
         $stmt->bindValue(':finalizado', $auction->isFinished(), \PDO::PARAM_BOOL);
         $stmt->bindValue(':id', $auction->getId(), \PDO::PARAM_INT);
