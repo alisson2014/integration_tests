@@ -62,7 +62,7 @@ final class Auction
         return $this->startDate;
     }
 
-    public function ItsMoreThanAWeekOld(): bool
+    public function itsMoreThanAWeekOld(): bool
     {
         $today = new \DateTime();
         $interval = $this->startDate->diff($today);

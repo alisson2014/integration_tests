@@ -19,7 +19,7 @@ class Terminator
         $auctions = $this->dao->recoverUnfinished();
 
         foreach ($auctions as $auction) {
-            if ($auction->ItsMoreThanAWeekOld()) {
+            if ($auction->itsMoreThanAWeekOld()) {
                 try {
                     $auction->ends();
                     $this->dao->update($auction);

@@ -44,9 +44,9 @@ class Auction
         $auctions = [];
         foreach ($data as $given) {
             $auction = new ModelAuction($given['descricao'], new \DateTimeImmutable($given['dataInicio']), $given['id']);
-            
+
             if ($given['finalizado']) $auction->ends();
-            
+
             $auctions[] = $auction;
         }
 

@@ -6,6 +6,7 @@ namespace Alura\Tests\Integration\Dao;
 
 use Alura\Auction\Dao\Auction as DaoAuction;
 use Alura\Auction\Model\Auction;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class DaoAuctionTest extends TestCase
@@ -28,22 +29,60 @@ class DaoAuctionTest extends TestCase
         self::$pdo->beginTransaction();
     }
 
-    public function testInsertionShouldWork(): void
+    #[DataProvider('auctions')]
+    public function testSearchUnfinishedAuctions(array $auctions): void
     {
-        $auction = new Auction('Variante 0km');
+        //Arrange
         $daoAuction = new DaoAuction(self::$pdo);
 
-        $daoAuction->save($auction);
+        foreach ($auctions as $auction) {
+            $daoAuction->save($auction);
+        }
 
+        //Act
         $auctions = $daoAuction->recoverUnfinished();
 
+        //Assert
         self::assertCount(1, $auctions);
         self::assertContainsOnlyInstancesOf(Auction::class, $auctions);
         self::assertSame('Variante 0km', $auctions[0]->getDescription());
+        self::assertFalse($auctions[0]->isFinished());
+    }
+
+    #[DataProvider('auctions')]
+    public function testSearchFinishedAuctions(array $auctions): void
+    {
+        //Arrange
+        $daoAuction = new DaoAuction(self::$pdo);
+
+        foreach ($auctions as $auction) {
+            $daoAuction->save($auction);
+        }
+
+        //Act
+        $auctions = $daoAuction->recoverFinished();
+
+        //Assert
+        self::assertCount(1, $auctions);
+        self::assertContainsOnlyInstancesOf(Auction::class, $auctions);
+        self::assertSame('Fiat 147 0km', $auctions[0]->getDescription());
+        self::assertTrue($auctions[0]->isFinished());
     }
 
     protected function tearDown(): void
     {
         self::$pdo->rollBack();
+    }
+
+    public static function auctions(): array
+    {
+        $unFinished = new Auction('Variante 0km');
+        $finished = new Auction('Fiat 147 0km');
+        $finished->ends();
+        $auctions = [$unFinished, $finished];
+
+        return [
+            [$auctions]
+        ];
     }
 }
