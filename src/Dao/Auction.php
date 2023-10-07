@@ -12,7 +12,7 @@ class Auction
     {
     }
 
-    public function save(ModelAuction $auction): void
+    public function save(ModelAuction $auction): ModelAuction
     {
         $sql = 'INSERT INTO leiloes (descricao, finalizado, dataInicio) VALUES (?, ?, ?)';
         $stmt = $this->conn->prepare($sql);
@@ -20,6 +20,12 @@ class Auction
         $stmt->bindValue(2, $auction->isFinished(), \PDO::PARAM_BOOL);
         $stmt->bindValue(3, $auction->getStartDate()->format('Y-m-d'));
         $stmt->execute();
+
+        return new ModelAuction(
+            $auction->getDescription(),
+            $auction->getStartDate(),
+            (int)$this->conn->lastInsertId()
+        );
     }
 
     /** @return ModelAuction[] */

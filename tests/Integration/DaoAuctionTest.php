@@ -29,6 +29,26 @@ class DaoAuctionTest extends TestCase
         self::$pdo->beginTransaction();
     }
 
+    public function testWhenUpdatingAuctionStatusMustBeChanged(): void
+    {
+        $auction = new Auction('Brasília Amarela');
+        $daoAuction = new DaoAuction(self::$pdo);
+        $auction = $daoAuction->save($auction);
+
+        $auctions = $daoAuction->recoverUnfinished();
+        self::assertCount(1, $auctions);
+        self::assertSame('Brasília Amarela', $auctions[0]->getDescription());
+        self::assertFalse($auctions[0]->isFinished());
+
+        $auction->ends();
+        $daoAuction->update($auction);
+
+        $auctions = $daoAuction->recoverFinished();
+        self::assertCount(1, $auctions);
+        self::assertSame('Brasília Amarela', $auctions[0]->getDescription());
+        self::assertTrue($auctions[0]->isFinished());
+    }
+
     #[DataProvider('auctions')]
     public function testSearchUnfinishedAuctions(array $auctions): void
     {
