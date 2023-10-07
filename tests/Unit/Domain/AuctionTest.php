@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Alura\Tests\Domain;
+namespace Alura\Tests\Unit\Domain;
 
 use Alura\Auction\Model\Bid;
 use Alura\Auction\Model\Auction;
@@ -49,7 +49,7 @@ class AuctionTest extends TestCase
     {
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Usuário já deu o último lance');
-        
+
         $auction = new Auction('Objeto inútil');
 
         $auction->receivesBid(new Bid($this->user1, 1000));
@@ -60,7 +60,7 @@ class AuctionTest extends TestCase
     {
         $user1 = new User('Usuário 1');
         $user2 = new User('Usuário 2');
-        
+
         return [
             [1, [new Bid($user1, 1000)]],
             [2, [new Bid($user1, 1000), new Bid($user2, 2000)]],

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Alura\Tests\Service;
+namespace Alura\Tests\Unit\Service;
 
 use Alura\Auction\Model\Auction;
 use Alura\Auction\Dao\Auction as DaoAuction;
@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 class TerminatorTest extends TestCase
 {
     private Terminator $terminator;
-    private $mockEmailSender;
+    private MockObject&EmailSender $mockEmailSender;
     private Auction $fiatAuction;
     private Auction $variantAuction;
 
@@ -30,6 +30,7 @@ class TerminatorTest extends TestCase
             new \DateTimeImmutable('10 days ago')
         );
 
+        /** @var MockObject&DaoAuction */
         $mockAuction = $this->createMock(DaoAuction::class);
         $mockAuction->method('recoverUnfinished')
             ->willReturn([$this->fiatAuction, $this->variantAuction]);
@@ -41,7 +42,7 @@ class TerminatorTest extends TestCase
                     1 => self::assertEquals($this->fiatAuction, $value),
                     2 => self::assertEquals($this->variantAuction, $value)
                 };
-            }); 
+            });
 
         $this->mockEmailSender = $this->createMock(EmailSender::class);
         $this->terminator = new Terminator($mockAuction, $this->mockEmailSender);
